@@ -797,10 +797,16 @@ bool mysql_delete(THD *thd, TABLE_LIST *table_list, COND *conds,
 
   /*
     From SQL2016, Part 2, 15.7 <Effect of deleting rows from base table>,
-    General Rules, 8), we can conclude that DELETE FOR PORTTION OF time performs
-    0-2 INSERTS + DELETE. We can substitute INSERT+DELETE with one UPDATE, but
-    only if there are no triggers set.
+    General Rules, 8), we can conclude that DELETE FOR PORTTION OF time
+    performs 0-2 INSERTS + DELETE. We can substitute INSERT+DELETE with one
+    UPDATE, but only if there are no triggers set.
     It is also meaningless for system-versioned table
+
+    For non-transactional tables, the INSERT step can fail, leaving the row
+    completely disappeared. TODO Fix it.
+    Because we don't want the effect of a DELETE statement to change when a
+    user creates triggers, we proactively disable UPDATE optimization for all
+    non-transactional tables until the above issue is fixed.
   */
   portion_of_time_through_update= !has_triggers
                                   && !table->versioned()
