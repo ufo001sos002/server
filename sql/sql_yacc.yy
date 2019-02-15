@@ -12166,9 +12166,8 @@ table_primary_ident:
                                                 Select->pop_index_hints(),
                                                 $2)))
               MYSQL_YYABORT;
-            TABLE_LIST *tl= $$;
             if ($3)
-              tl->vers_conditions= Lex->vers_conditions;
+              $$->vers_conditions= Lex->vers_conditions;
           }
         ;
 
